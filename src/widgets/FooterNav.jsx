@@ -35,7 +35,8 @@ export default function FooterNav() {
   }
 
   return (
-    <nav className="footerNav" aria-label="Инструменты">
+  <nav className="footerNav" aria-label="Инструменты">
+    <div className="footerNav__scroll">
       {visibleTools.map((t) => (
         <button
           key={t.key}
@@ -49,23 +50,24 @@ export default function FooterNav() {
       ))}
 
       {!isRescue && (
-  <button
-    type="button"
-    className="footerBtn"
-    onClick={() => {
-      if (!grade) return nav("/grade");
-      nav(`/task/${grade}/rescue`);
-    }}
-  >
-    <span className="footerBtn__icon" aria-hidden="true">💧</span>
-    <span className="footerBtn__text">Спаси мастерскую</span>
-  </button>
-)}
+        <button
+          type="button"
+          className="footerBtn"
+          onClick={() => {
+            if (!grade) return nav("/grade");
+            nav(`/task/${grade}/rescue`);
+          }}
+        >
+          <span className="footerBtn__icon" aria-hidden="true">💧</span>
+          <span className="footerBtn__text">Спаси мастерскую</span>
+        </button>
+      )}
 
       <button type="button" className="footerBtn" onClick={() => nav("/grade")}>
         <span className="footerBtn__icon" aria-hidden="true">🎓</span>
         <span className="footerBtn__text">Выбрать класс</span>
       </button>
-    </nav>
-  );
+    </div>
+  </nav>
+);
 }

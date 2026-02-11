@@ -16,6 +16,8 @@
 
   --ok-bg: #DCFCE7;
   --ok-border: #22c55e;
+
+  --footer-h: 96px;
 }
 
 /* =========================
@@ -57,7 +59,8 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 .content{
-  padding: 18px 14px 140px;
+  padding: 18px 14px 0;
+  padding-bottom: calc(var(--footer-h) + 16px);
   max-width: 980px;
   width: 100%;
   margin: 0 auto;
@@ -73,10 +76,24 @@ button, input, textarea, select { font-family: inherit; }
   box-shadow: var(--shadow);
 }
 
-.panel--task { padding-bottom: 140px; }
+.panel--task { padding-bottom: calc(var(--footer-h) + 16px);
+}
 
-@media (max-width: 700px) {
-  .panel { padding: 16px; }
+@media (max-width: 700px) and (orientation: portrait) {
+  :root{ --footer-h: 170px; } /* 2 ряда кнопок */
+
+  .content{
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .panel{
+    max-width: 100%;
+    width: 100%;
+    margin: 0; /* важно: убираем auto-центрирование */
+    padding: 16px;
+  }
+
   .taskHeader { flex-direction: column; align-items: stretch; }
 }
 
@@ -144,6 +161,7 @@ button, input, textarea, select { font-family: inherit; }
   box-shadow: 0 0 0 2px rgba(138,142,233,0.25), 0 8px 18px rgba(138,142,233,0.22);
 }
 
+
 .scalesWrap{
   position: relative;
   width: 100%;
@@ -156,6 +174,10 @@ button, input, textarea, select { font-family: inherit; }
   width: min(920px, 100%);
   height: auto;
   display: block;
+}
+
+.scalesWrap{
+  overflow: visible;
 }
 
 /* overlay поверх SVG */
@@ -310,6 +332,258 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 /* =========================
+   SCALES — MOBILE FIT (portrait)
+   ========================= */
+
+/* Базовый масштаб (1 = как сейчас) */
+.scalesWrap{
+  --ui: 1;
+}
+
+/* На узких портретных — уменьшаем UI оверлея */
+@media (max-width: 480px) and (orientation: portrait){
+  .overlayRight{
+    left: 50%;                 /* было 61% */
+    transform:
+      translateX(-50%)
+      translateY(var(--rightShift, 0px));  /* сохраняем твою “физику” */
+  }
+}
+
+/* Шрифты в оверлее */
+.overlayLeft,
+.overlayRight{
+  font-size: calc(40px * var(--ui));
+}
+
+/* правая строка: уменьшаем расстояния */
+.rightExprRow{
+  gap: calc(10px * var(--ui));
+}
+
+/* инпуты */
+.cupInput{
+  width: calc(74px * var(--ui));
+  height: calc(50px * var(--ui));
+  font-size: calc(34px * var(--ui));
+  border-radius: calc(14px * var(--ui));
+}
+
+.cupInput--result{
+  width: calc(84px * var(--ui));
+}
+
+/* чипы */
+.cupChip{
+  width: calc(68px * var(--ui));
+  height: calc(48px * var(--ui));
+  font-size: calc(34px * var(--ui));
+  border-radius: calc(16px * var(--ui));
+}
+
+.cupChip--result{
+  width: calc(74px * var(--ui));
+}
+
+/* SVG должен быть inline, чтобы трансформы работали */
+.scalesSvg {
+  display: block;
+  width: min(920px, 100%);  /* можешь менять */
+  height: auto;
+}
+
+/* Важно для трансформаций внутри SVG */
+#beam{
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+#rightGroup{
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* Текст в чашах */
+.bowlValue {
+  font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  fill: #2D2E83;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.scalesWrap{
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 16px;
+}
+
+.scalesWrap .scalesSvg{
+  width: min(920px, 100%);
+  height: auto;
+  display: block;
+}
+
+.scalesWrap{
+  overflow: visible;
+}
+
+/* overlay поверх SVG */
+.scalesOverlay{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scalesOverlay input,
+.scalesOverlay button{
+  pointer-events: auto;
+}
+
+.scalesWrap > svg { position: relative; z-index: 1; }
+.scalesOverlay { z-index: 2; }
+
+/* включаем клики только на кнопке */
+.scalesOverlay button{
+  pointer-events: auto;
+}
+
+/* Левая чаша: выражение a-b= */
+.overlayLeft{
+  position: absolute;
+  left:3%;
+  top: 4%;
+  font-family: Nunito;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px; 
+}
+
+.chipNum--hl{
+  background: rgba(183, 179, 255, 0.9);
+  border-radius: 8px;
+  padding: 0 6px;
+}
+
+.chipResPlaceholder{
+  display: inline-block;
+  width: 34px; /* чтобы не прыгало */
+}
+
+/* Правая чаша: инпуты */
+.overlayRight{
+  position: absolute;
+  left: 61%;          /* смещение вправо (было 62%) */
+  top: 4%;            /* чуть ниже, чтобы лечь в чашу */
+  font-family: Nunito;
+  font-size: 40px;
+
+  /* ключевое: двигаем вместе с чашей */
+  transform: translateY(var(--rightShift, 0px));
+  transition: transform 450ms ease-out;
+  will-change: transform;
+}
+
+/* строка справа */
+.rightExprRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cupInput{
+  width: 74px;
+  height: 50px;
+  border-radius: 14px;
+  border: 2px solid rgba(86,145,240,0.35);
+  background: rgba(255,255,255,0.95);
+  text-align: center;
+  font-family: Nunito;
+  font-size: 34px;
+  font-weight: 700;
+  color: #111;
+  padding: 0;
+}
+.cupInput--result{ width: 84px; }
+
+.cupInput--active{
+  outline: none;
+  border-color: rgba(138,142,233,0.95);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
+}
+
+.cupInput--hl{
+  border-color: rgba(138,142,233,0.95);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
+}
+
+.cupInput--locked{
+  opacity: 0.85;
+}
+
+.cupChip{
+  width: 68px;
+  height: 48px;
+  border-radius: 16px;
+   border: none;
+   background: rgba(255,255,255,0.95);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: Nunito;
+  font-size: 34px;
+  font-weight: 800;
+    color: #111;
+    user-select: none;
+}
+
+.cupChip--result{
+  width: 74px;
+}
+
+.cupChip--filled{
+  color: #111827;
+}
+
+/* подсветка по ТЗ */
+.cupChip--hl{
+  background: #c5c9f4; /* мягкий фиолетовый */
+  box-shadow: 0 6px 16px rgba(138,142,233,0.22);
+}
+
+/* над первым инпутом a' */
+.hint--a{ left: 0px; }
+
+/* над вторым инпутом b' (подвинем вправо на ширину первого инпута + знак) */
+.hint--b{ left: 120px; }
+
+/* кнопка-число как токен */
+.overlayPick{
+  border: none;
+  background: #b7b3ff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.overlayPick--disabled{
+  opacity: 0.5;
+  cursor: default;
+}
+
+.exprLabel{
+  font-weight:700;
+  margin-bottom:10px;
+}
+   
+/* =========================
    TOKENS / SLOTS / EXPRESSION ROW
    ========================= */
 .exprRow{
@@ -449,15 +723,12 @@ button, input, textarea, select { font-family: inherit; }
 /* =========================
    FOOTER NAV
    ========================= */
+
 .footerNav{
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
 
   padding: 10px;
   background: #ffffff;
@@ -466,6 +737,13 @@ button, input, textarea, select { font-family: inherit; }
   backdrop-filter: blur(10px);
 }
 
+.footerNav__scroll{
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ВОЗВРАЩАЕМ “красивые” кнопки */
 .footerBtn{
   border: 1px solid #e5e7eb;
   background: #ffffff;
@@ -485,6 +763,86 @@ button, input, textarea, select { font-family: inherit; }
 .footerBtn__icon{ font-size: 26px; }
 .footerBtn__text{ font-size: 18px; color: var(--muted); }
 
+/* MOBILE */
+@media (max-width: 700px){
+  .footerNav__scroll{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .footerBtn{
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .footerBtn__icon{ font-size: 22px; }
+  .footerBtn__text{ font-size: 14px; }
+}
+
+/* LANDSCAPE (низкая высота): даже если ширина большая, ужимаем футер */
+@media (orientation: landscape) and (max-height: 500px){
+  .content{ padding-left: 10px; padding-right: 10px; }
+  .panel{ border-radius: 14px; }
+  :root{ --footer-h: 96px; }
+
+  .footerNav__scroll{
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .footerBtn{
+    padding: 10px 10px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .footerBtn__icon{ font-size: 20px; }
+  .footerBtn__text{ font-size: 14px; }
+}
+/* ===== FOOTER: убираем горизонтальный скролл на мобилке ===== */
+
+/* 1) грид не должен раздуваться шире экрана */
+.footerNav{
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.footerNav__scroll{
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 2) КЛЮЧ: grid-элементам можно сжиматься */
+.footerBtn{
+  min-width: 0;        /* важно для grid */
+  width: 100%;         /* чтобы занимали колонку */
+}
+
+/* 3) КЛЮЧ: flex-детям внутри кнопки тоже разрешаем сжиматься */
+.footerBtn__icon{ flex: 0 0 auto; }
+.footerBtn__text{
+  min-width: 0;        /* важно для flex */
+  white-space: normal; /* разрешаем перенос строк */
+  text-align: center;
+}
+
+/* 4) На узких экранах лучше складывать контент кнопки "в столбик" */
+@media (max-width: 700px) and (orientation: portrait){
+  .footerNav__scroll{
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .footerBtn{
+    flex-direction: column; /* вместо строки */
+    gap: 6px;
+    padding: 10px 8px;      /* чуть компактнее */
+  }
+
+  .footerBtn__text{
+    font-size: 13px;
+    line-height: 1.1;
+  }
+}
 /* =========================
    EQUALS / RESULT
    ========================= */
@@ -1167,7 +1525,7 @@ button, input, textarea, select { font-family: inherit; }
 
 /* позиционирование над нужным инпутом */
 .scalesOverlay .hint--a{ left: 0%; }
-.scalesOverlay .hint--b{ left: 128; }
+.scalesOverlay .hint--b{ left: 128px; }
 
 /* кликабельное число (как в молотке — фиолетовая рамка) */
 .scaleNum--clickable{
@@ -1601,3 +1959,463 @@ button, input, textarea, select { font-family: inherit; }
   transform: scale(0.96);
   box-shadow: 0 3px 8px rgba(138,142,233,0.25);
 }
+/* ===== SCALES: mobile fit (override, must be at file end) ===== */
+@media (max-width: 480px) and (orientation: portrait){
+
+  /* 1) центрируем правую группу в чаше */
+  .overlayRight{
+    left: 50% !important;
+    transform: translateX(-50%) translateY(var(--rightShift, 0px)) !important;
+  }
+
+  /* 2) уменьшаем всю “формулу” */
+  .overlayLeft,
+  .overlayRight{
+    font-size: 26px !important;
+  }
+
+  .rightExprRow{
+    gap: 6px !important;
+  }
+
+  /* 3) уменьшаем инпуты */
+  .cupInput{
+    width: 52px !important;
+    height: 38px !important;
+    font-size: 22px !important;
+    border-radius: 12px !important;
+  }
+
+  .cupInput--result{
+    width: 60px !important;
+  }
+
+  /* 4) чтобы знаки не раздували строку */
+  .chipOp{
+    font-size: 22px !important;
+    line-height: 1 !important;
+  }
+
+  /* 5) чтобы строка не переносилась */
+  .rightExprRow{
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* ===== SCALES: mobile overlay sizing (PUT AT THE VERY END) ===== */
+@media (max-width: 480px) and (orientation: portrait){
+
+  .scalesWrap{ --rightScale: .68; } /* как сейчас */
+
+  .overlayRight{
+    left: 80% !important;     /* ← двигаем в правую чашу (подкрути 68–78%) */
+    top: 5% !important;
+
+    transform:
+      translateX(-50%)
+      translateY(var(--rightShift, 0px))
+      scale(var(--rightScale)) !important;
+
+    transform-origin: top center !important;
+  }
+
+  /* 2) чтобы знаки/строка не разваливались */
+  .rightExprRow{
+    gap: 3px !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+
+  /* 3) дополнительно уменьшим инпуты (на случай, если scale мало) */
+  .cupInput{
+    width: 48px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+    border-radius: 12px !important;
+  }
+  .cupInput--result{
+    width: 48px !important;
+  }
+
+  /* 4) хинты над инпутами тоже должны “ехать” с масштабом */
+  .scalesOverlay .hint{
+    transform: scale(var(--rightScale)) !important;
+    transform-origin: left bottom !important;
+  }
+}
+@media (max-width: 480px) and (orientation: portrait){
+
+  .scalesOverlay .hint{
+    top: -42px;        /* можно чуть ниже/выше */
+  }
+
+  /* если нужно двигать конкретно 9+1 */
+  .scalesOverlay .hint--b{
+    left: 73px;        /* ← двигай это число */
+  }
+
+  .scalesOverlay .hint--a{
+    left: 0px;       /* ← если нужно левый */
+  }
+}
+/* =========================
+   SCALES — MOBILE LEFT BOWL TUNE
+   ========================= */
+
+@media (max-width: 480px) and (orientation: portrait){
+
+  .overlayLeft{ gap: 3px !important; }
+
+  .overlayLeft .cupChip{
+    width: 28px !important;
+    height: 30px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .overlayLeft .cupChip--result{
+    width: 28px !important;
+  }
+
+  /* ВОТ ОНО: знаки у тебя class="chipOp" */
+  .overlayLeft .chipOp{
+    font-size: 16px !important; /* попробуй 10–14 */
+    line-height: 1 !important;
+  }
+}
+@media (max-width: 480px) and (orientation: portrait){
+  .overlayLeft{
+    transform: translateX(-1px) translateY(-4px) !important;
+  }
+}
+
+@media (max-width: 480px){
+  :root{
+    --footer-h: 130px; /* вместо 170 */
+  }
+}
+
+/* =========================
+   MOBILE FIT — exprCard (all tools)
+   ========================= */
+@media (max-width: 520px) and (orientation: portrait){
+
+  /* строка выражения в молотке */
+  .exprCard .exprRow{
+    gap: 5px;   /* было 10–14px */
+  }
+
+  /* общий коэффициент масштаба */
+  .exprCard{
+    --m: 0.50; /* можно 0.78–0.88 подбирать */
+  }
+
+  /* === числа / токены === */
+  .exprCard .token{
+    min-width: calc(56px * var(--m));
+    min-height: calc(56px * var(--m));
+    font-size: calc(32px * var(--m));
+    border-radius: calc(14px * var(--m));
+  }
+
+  /* === знаки + и = === */
+  .exprCard .plus,
+  .exprCard .exprEquals{
+    font-size: calc(32px * var(--m));
+    line-height: 1;
+  }
+
+  /* === инпуты (если есть) === */
+  .exprCard input,
+  .exprCard .answerInput{
+  width: calc(140px * var(--m));   /* ← ВОТ ЭТО НУЖНО ДОБАВИТЬ */
+  height: calc(56px * var(--m));
+  font-size: calc(26px * var(--m));
+  border-radius: calc(14px * var(--m));
+  flex: 0 0 auto;
+}
+
+  /* === solved состояние === */
+  .exprCard--solved .token,
+  .exprRow--solved .token{
+    font-size: calc(26px * var(--m));
+  }
+}
+/* =========================
+   MAGNET — MOBILE SCALE UP
+   ========================= */
+
+@media (max-width: 520px) and (orientation: portrait){
+
+  /* когда миссия решена (у тебя уже есть класс --solved) */
+  .exprCard.magnetCard.exprCard--solved .exprEquals{
+    font-size: 22px !important;
+    font-weight: 900;
+    margin-left: 4px;
+    margin-right: 2px;
+  }
+
+  /* число результата (обычно последний элемент в строке) */
+  .exprCard.magnetCard.exprCard--solved .exprRow > :last-child{
+    font-size: 22px !important;
+    font-weight: 900;
+  }
+
+  /* если результат у тебя именно token — на всякий */
+  .exprCard.magnetCard.exprCard--solved .exprRow > :last-child.token{
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+.exprCard.magnetCard .plus,
+.exprCard.magnetCard .exprEquals,
+.exprCard.magnetCard .magnetOp{
+  font-size: 16px !important;
+}
+
+  /* убираем верхний внутренний отступ карточки */
+  .magnetCard{
+    padding-top: 10px;   /* было 16–24 */
+  }
+
+  /* убираем лишний margin у первой строки */
+  .magnetCard .exprRow:first-child{
+    margin-top: 0;
+  }
+
+  /* если есть общий gap у контейнера */
+  .magnetCard .stack{
+    margin-top: 0;
+  }
+
+  /* уменьшаем ширину инпутов только в магните */
+  .magnetCard input,
+  .magnetCard .answerInput{
+    width: 60px;        /* подбирай 64–80 */
+    min-width: 60px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+  /* чуть увеличиваем масштаб */
+  .magnetCard{
+    --mag: 0.8;   /* можно 1.1 – 1.2 подобрать */
+  }
+
+  /* перебиваем глобальный mobile scale */
+.exprCard.magnetCard .token{
+  min-width: 34px !important;
+  min-height: 34px !important;
+  font-size: 22px !important;
+  padding: 0 6px;
+  border-radius: 8px;
+}
+
+  .exprCard.magnetCard .plus,
+.exprCard.magnetCard .exprEquals{
+  font-size: 18px !important;
+  margin: 0 2px;
+}
+
+  /* строки выражения */
+  .magnetCard .exprRow{
+    gap: 8px;   /* можно 8px если хочется плотнее */
+  }
+
+  /* сама карточка внутри */
+  .magnetCard{
+    padding: 18px 12px;
+  }
+
+  /* уменьшаем расстояние в строках результата */
+  .magnetCard .exprRow{
+    gap: 4px;                 /* было 8–12 */
+  }
+
+  /* уменьшаем расстояние между строками */
+  .magnetCard .exprRow + .exprRow{
+    margin-top: 4px;
+  }
+
+  /* токены компактнее */
+  .magnetCard .token{
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  /* знаки + и = компактнее */
+  .magnetCard .plus,
+  .magnetCard .exprEquals{
+    font-size: 18px;
+    margin: 0 2px;
+  }
+
+ /* =========================
+   WRENCH/DRAG on MOBILE: tap UX
+   ========================= */
+@media (max-width: 520px) and (orientation: portrait){
+
+  .exprCard .token--picked{
+    transform: translateY(-1px) scale(1.03);
+    background: #EEF2FF;
+    border: 2px solid rgba(138,142,233,0.95);
+    box-shadow:
+      0 10px 20px rgba(138,142,233,0.22),
+      0 0 0 4px rgba(138,142,233,0.18);
+  }
+
+  .exprCard .slot--picked{
+    border-radius: 16px;
+  }
+
+  @media (max-width: 520px) and (orientation: portrait){
+
+  /* выбранная кнопка — активная */
+  .exprCard .token--picked{
+    transform: translateY(-4px) scale(1.06);
+    background: #EEF2FF;
+    border: 2px solid rgba(138,142,233,1);
+    box-shadow:
+      0 14px 28px rgba(138,142,233,0.35),
+      0 0 0 6px rgba(138,142,233,0.15);
+    transition: all .2s ease;
+  }
+
+  /* цели — мягкая живая пульсация */
+  .exprCard .slot--target{
+    border-radius: 16px;
+    animation: glowPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse{
+    0%{
+      box-shadow: 0 0 0 0 rgba(138,142,233,0.4);
+      transform: scale(1);
+    }
+    50%{
+      box-shadow: 0 0 0 10px rgba(138,142,233,0.12);
+      transform: scale(1.03);
+    }
+    100%{
+      box-shadow: 0 0 0 0 rgba(138,142,233,0.4);
+      transform: scale(1);
+    }
+  }
+
+}
+
+  .exprCard .slot{
+    -webkit-tap-highlight-color: transparent;
+  }
+  .exprCard .slot:active{
+    transform: scale(0.98);
+  }
+}
+
+/* =========================
+   KEY/WRENCH — mobile: make answer input narrower
+   (важно: селектор без rescueCard/wrenchCard)
+   ========================= */
+@media (max-width: 520px) and (orientation: portrait){
+  .exprCard .exprInlineAnswer .answerInput{
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    flex: 0 0 48px !important;  /* вот тут должно быть 48px, а не 10px */
+    padding: 0 !important;
+  }
+}
+
+/* =========================
+   RESCUE/WRENCH — mobile: scale widget WITHOUT overflow
+   (скейлим НЕ детей, а внутренний блок карточки)
+   ========================= */
+@media (max-width: 520px) and (orientation: portrait){
+
+  html, body{ overflow-x: hidden; }
+
+  /* карточка */
+  .panel--task .exprCard{
+    overflow: hidden;
+  }
+
+  /* скейлим контент внутри (а не каждый child по отдельности) */
+  .panel--task .exprCard .exprRow,
+  .panel--task .exprCard .exprHintRow,
+  .panel--task .exprCard .exprLabel{
+    --s: 0.88; /* подбирай 0.82–0.92 */
+    transform: scale(var(--s));
+    transform-origin: left top;
+    width: calc(100% / var(--s)); /* чтобы не уезжало вправо */
+  }
+}
+/* =========================
+   WRENCH — SMALL mobile: fit solved row
+   ========================= */
+@media (max-width: 390px){
+
+  /* 1) убиваем горизонтальный скролл у строки */
+  .exprCard--withMark .exprRow--main{
+    overflow-x: hidden !important;  /* вместо scroll */
+    gap: 0px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* 2) токены чуть меньше */
+  .exprCard--withMark .token{
+    min-width: 42px !important;
+    min-height: 42px !important;
+    font-size: 18px !important;
+    padding: 0 4px !important;
+    border-radius: 10px !important;
+  }
+
+  /* 3) плюсики меньше и без лишних отступов */
+  .exprCard--withMark .plus{
+    font-size: 18px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  /* 4) равно и ответ — компактнее + убираем margin-left:10px */
+  .exprCard--withMark .exprEquals{
+    font-size: 18px !important;
+    line-height: 1 !important;
+    margin: 0 0 0 2px !important;  /* <-- вместо 10px */
+    white-space: nowrap !important;
+  }
+}
+
+/* =========================
+   MOBILE — answer input square like tokens
+   ========================= */
+@media (max-width: 520px){
+
+  .exprInlineAnswer{
+    display: flex;
+    align-items: center;
+  }
+
+  .exprInlineAnswer .answerInput{
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+
+    padding: 0 !important;
+
+    font-size: 18px !important;
+    text-align: center !important;
+
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+
+    flex: 0 0 42px !important; /* не растягиваться */
+  }
+}
+
