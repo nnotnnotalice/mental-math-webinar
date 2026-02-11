@@ -1,0 +1,1603 @@
+:root {
+  --accent: #8A8EE9;
+  --accent-hover: #7075e2;
+
+  --result-bg: #F0F1FD;
+  --text-color: #111827;
+  --muted: #6B7280;
+
+  --error: #f97373;
+  --error-bg: #FEF2F2;
+
+  --card-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --border: #e5e7eb;
+  --shadow: 0 4px 10px rgba(138, 142, 233, 0.18);
+
+  --ok-bg: #DCFCE7;
+  --ok-border: #22c55e;
+}
+
+/* =========================
+   GLOBAL
+   ========================= */
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body{
+  font-family:"Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin:0;
+  background:#fff;
+  color:var(--text-color);
+}
+
+button, input, textarea, select { font-family: inherit; }
+
+/* =========================
+   APP SHELL
+   ========================= */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+.topbar{
+  background: var(--accent);
+  color: #fff;
+  padding: 18px 16px;
+  border: none;
+  box-shadow: 0 6px 18px rgba(138,142,233,0.25);
+}
+
+.topbar__title{
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: 0.2px;
+}
+
+.content{
+  padding: 18px 14px 140px;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.panel{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.panel--task { padding-bottom: 140px; }
+
+@media (max-width: 700px) {
+  .panel { padding: 16px; }
+  .taskHeader { flex-direction: column; align-items: stretch; }
+}
+
+/* =========================
+   HEADERS / TEXT
+   ========================= */
+.taskHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom: 18px;
+}
+
+.h1{
+  margin: 10px 0 12px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-color);
+}
+
+.hint{
+  font-size: 18px;          /* было 20 */
+  color: #9CA3AF;
+  line-height: 1.4;
+  margin-top: 2px;          /* чтобы “дышал” под заголовком */
+}
+
+.crumb{
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+/* =========================
+   STACK / CARDS
+   ========================= */
+.stack{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-top: 12px;
+}
+
+@keyframes cardEnter {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.exprCard{
+  position: relative;
+  background:#fff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+}
+
+.exprCard--enter { animation: cardEnter 0.38s ease; }
+.exprCard--inactive { opacity: 0.55; }
+
+.exprCard--active{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(138,142,233,0.25), 0 8px 18px rgba(138,142,233,0.22);
+}
+
+.scalesWrap{
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 16px;
+}
+
+.scalesWrap .scalesSvg{
+  width: min(920px, 100%);
+  height: auto;
+  display: block;
+}
+
+/* overlay поверх SVG */
+.scalesOverlay{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scalesOverlay input,
+.scalesOverlay button{
+  pointer-events: auto;
+}
+
+.scalesWrap > svg { position: relative; z-index: 1; }
+.scalesOverlay { z-index: 2; }
+
+/* включаем клики только на кнопке */
+.scalesOverlay button{
+  pointer-events: auto;
+}
+
+/* Левая чаша: выражение a-b= */
+.overlayLeft{
+  position: absolute;
+  left:3%;
+  top: 4%;
+  font-family: Nunito;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px; 
+}
+
+.chipNum--hl{
+  background: rgba(183, 179, 255, 0.9);
+  border-radius: 8px;
+  padding: 0 6px;
+}
+
+.chipResPlaceholder{
+  display: inline-block;
+  width: 34px; /* чтобы не прыгало */
+}
+
+/* Правая чаша: инпуты */
+.overlayRight{
+  position: absolute;
+  left: 61%;          /* смещение вправо (было 62%) */
+  top: 4%;            /* чуть ниже, чтобы лечь в чашу */
+  font-family: Nunito;
+  font-size: 40px;
+
+  /* ключевое: двигаем вместе с чашей */
+  transform: translateY(var(--rightShift, 0px));
+  transition: transform 450ms ease-out;
+  will-change: transform;
+}
+
+/* строка справа */
+.rightExprRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cupInput{
+  width: 74px;
+  height: 50px;
+  border-radius: 14px;
+  border: 2px solid rgba(86,145,240,0.35);
+  background: rgba(255,255,255,0.95);
+  text-align: center;
+  font-family: Nunito;
+  font-size: 34px;
+  font-weight: 700;
+  color: #111;
+  padding: 0;
+}
+.cupInput--result{ width: 84px; }
+
+.cupInput--active{
+  outline: none;
+  border-color: rgba(138,142,233,0.95);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
+}
+
+.cupInput--hl{
+  border-color: rgba(138,142,233,0.95);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
+}
+
+.cupInput--locked{
+  opacity: 0.85;
+}
+
+.cupChip{
+  width: 68px;
+  height: 48px;
+  border-radius: 16px;
+   border: none;
+   background: rgba(255,255,255,0.95);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: Nunito;
+  font-size: 34px;
+  font-weight: 800;
+    color: #111;
+    user-select: none;
+}
+
+.cupChip--result{
+  width: 74px;
+}
+
+.cupChip--filled{
+  color: #111827;
+}
+
+/* подсветка по ТЗ */
+.cupChip--hl{
+  background: #c5c9f4; /* мягкий фиолетовый */
+  box-shadow: 0 6px 16px rgba(138,142,233,0.22);
+}
+
+/* над первым инпутом a' */
+.hint--a{ left: 0px; }
+
+/* над вторым инпутом b' (подвинем вправо на ширину первого инпута + знак) */
+.hint--b{ left: 120px; }
+
+/* кнопка-число как токен */
+.overlayPick{
+  border: none;
+  background: #b7b3ff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.overlayPick--disabled{
+  opacity: 0.5;
+  cursor: default;
+}
+
+.exprLabel{
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+/* =========================
+   TOKENS / SLOTS / EXPRESSION ROW
+   ========================= */
+.exprRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  
+}
+
+.plus{
+  opacity: 0.85;
+  font-weight: 800;
+}
+
+.slot{
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px dashed rgba(231, 238, 252, 0.22);
+  min-width: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* КЛЮЧ: когда слот ок — заливаем сам токен */
+.slot--ok .token{
+  background: var(--ok-bg);          /* #DCFCE7 */
+  border-color: rgba(34,197,94,0.35);
+  box-shadow: inset 0 -2px 0 rgba(34,197,94,0.18);
+}
+
+.token{
+  min-width: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+
+  text-align: center;
+  user-select: none;
+  background: #fff;
+  color: var(--text-color);
+}
+
+.token--movable{
+  border: 2px solid rgba(138, 142, 233, 0.7); /* фиолетовая рамка */
+  outline: none;
+  cursor: grab;
+  box-shadow: 0 0 0 3px rgba(138, 142, 233, 0.15);
+}
+
+.token--fixed{ opacity: 0.95; }
+
+.token--disabled{
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* =========================
+   INPUTS / BUTTONS
+   ========================= */
+.answerRow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top: 12px;
+}
+
+.answerInput{
+  flex: 0 0 120px;
+  width: 120px;
+  height: 56px;
+
+  border-radius: 14px;
+  border: 2px solid rgba(138,142,233,0.35);
+
+  background: #fff;
+  color: var(--text-color);
+
+  font-size: 26px;        /* как у token */
+  font-weight: 800;
+  text-align: center;     /* центр по горизонтали */
+}
+
+.answerInput:focus{
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(138, 142, 233, 0.25);
+}
+
+.answerInput--ok{
+  background: var(--ok-bg);
+  border-color: rgba(34, 197, 94, 0.55);
+}
+
+.btn-primary{
+  width: auto;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(138, 142, 233, 0.4);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.btn-primary:hover{
+  background: var(--accent-hover);
+  box-shadow: 0 5px 14px rgba(138, 142, 233, 0.55);
+}
+
+.btn-primary:active{
+  transform: scale(0.97);
+  box-shadow: 0 3px 8px rgba(138, 142, 233, 0.35);
+}
+
+/* =========================
+   STATUS
+   ========================= */
+.status{ margin-top: 10px; font-weight: 700; }
+.status--warn{ color: #ef4444; }
+
+/* =========================
+   FOOTER NAV
+   ========================= */
+.footerNav{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+
+  padding: 10px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -6px 18px rgba(17,24,39,0.06);
+  backdrop-filter: blur(10px);
+}
+
+.footerBtn{
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: var(--text-color);
+  border-radius: 14px;
+  padding: 18px 16px;
+  cursor: pointer;
+
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 10px rgba(138,142,233,0.18);
+}
+
+.footerBtn__icon{ font-size: 26px; }
+.footerBtn__text{ font-size: 18px; color: var(--muted); }
+
+/* =========================
+   EQUALS / RESULT
+   ========================= */
+.exprEquals{
+  margin-left: 10px;
+  font-weight: 900;
+  font-size: 34px;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.exprSolvedRow{
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.exprCheck{
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 28px;
+  font-weight: 900;
+
+  color: #16a34a;
+  background: #ecfdf5;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 6px rgba(22,163,74,0.25);
+}
+
+/* =========================
+   LEFT MARKER (галка слева)
+   ========================= */
+.exprSolvedMark{
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eaf7ef;
+  color: #22c55e;
+  font-size: 26px;
+  font-weight: 900;
+
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.25);
+}
+
+/* если у карточки есть левый маркер — делаем отступ у контента */
+.exprCard--withMark .exprRow,
+.exprCard--withMark .exprHintRow,
+.exprCard--withMark .exprSolvedRow{
+  padding-left: 64px;
+}
+
+/* =========================
+   HINT UNDER EXPRESSION
+   ========================= */
+.exprHintRow{
+  margin-top: 10px;
+}
+
+.exprHint{
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 14px;
+  
+
+  /* нейтральный фон, не "успех" */
+  background: #F3F4F6; /* светло-серый */
+  color: #374151;      /* спокойный тёмно-серый */
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  /* убираем success-ощущение */
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06);
+}
+
+/* зелёный хинт ТОЛЬКО для "Круглое число найдено!" */
+.exprHint--ok{
+  background: var(--ok-bg);          /* #DCFCE7 */
+  color: #166534;                    /* тёмно-зелёный текст */
+  box-shadow: inset 0 -2px 0 rgba(34,197,94,0.25);
+}
+
+/* красный хинт для ошибки */
+.exprHint--warn{
+  background: var(--error-bg); /* #FEF2F2 */
+  color: #991B1B;              /* тёмно-красный текст */
+  box-shadow: inset 0 -2px 0 rgba(239, 68, 68, 0.18);
+}
+
+/* =========================
+   PICK TOKEN (для молотка/меню)
+   ========================= */
+.pickToken{
+  border: 2px solid rgba(138,142,233,0.45);
+  background: #fff;
+  cursor: pointer;
+}
+
+.pickToken:hover{
+  background: #F3F4FF;
+}
+
+.pickToken--disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =========================
+   MAGNET — UI + STEPS
+   ========================= */
+.magnetSteps{ margin-top: 14px; }
+
+.magnetInputs{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.magnetOp{
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-color);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magnetCell{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.magnetBubble{
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #e6f9ee;
+  color: #065f46;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: inset 0 -3px 0 rgba(16,185,129,0.25);
+}
+
+.magnetInput{
+  width: 120px;
+  height: 56px;
+  border-radius: 14px;
+  border: 2px solid rgba(138,142,233,0.35);
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+  background: #fff;
+  color: var(--text-color);
+}
+
+.magnetInput:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(138,142,233,0.25);
+}
+
+.magnetInput--ok{
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+}
+
+/* =========================
+   MAGNET — CLICKABLE NUMBERS
+   (работает только внутри карточки магнита)
+   ========================= */
+.magnetCard .magPick{
+  border: 2px solid rgba(138, 142, 233, 0.45);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.magnetCard .magPick:hover{
+  background: #F3F4FF;
+  box-shadow: 0 0 0 3px rgba(138, 142, 233, 0.15);
+}
+
+/* донор — чуть сильнее */
+.magnetCard .magPick--donor{
+  border-color: rgba(138, 142, 233, 0.70);
+  box-shadow: 0 0 0 3px rgba(138, 142, 233, 0.10);
+}
+
+/* выбранное число */
+.magnetCard .magPick--picked{
+  border-color: rgba(138, 142, 233, 0.90);
+  box-shadow: 0 0 0 4px rgba(138, 142, 233, 0.18);
+}
+
+/* когда карточка неактивна — клики визуально “приглушаем” */
+.exprCard--inactive .magPick{
+  opacity: 0.55;
+}
+
+/* =========================
+   GRADES / TOOL BUTTONS (оставил как было по смыслу)
+   ========================= */
+.gradeGrid, .gradeRow, .gradeButtons{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  align-items:stretch;
+}
+
+.gradeBtn{
+  flex: 1;
+  max-width: 420px;
+  padding: 18px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(138,142,233,0.35);
+  background: #fff;
+  color: var(--text-color);
+  font-weight: 800;
+  font-size: 22px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(138,142,233,0.20);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.gradeBtn:hover{
+  background: #F3F4FF;
+  box-shadow: 0 8px 18px rgba(138,142,233,0.28);
+}
+
+.gradeBtn:active{ transform: scale(0.98); }
+/* =========================
+   HAMMER PICK MENU (restore)
+   ========================= */
+.pickMenu{
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  gap: 10px;
+
+  padding: 10px;
+  border-radius: 14px;
+
+  background: #ffffff;
+  border: 2px solid rgba(138,142,233,0.35);
+  box-shadow: 0 10px 22px rgba(17,24,39,0.10);
+}
+
+.pickMenu__item{
+  width: 220px;
+  max-width: 260px;
+  padding: 12px 14px;
+
+  border-radius: 12px;
+  border: 2px solid rgba(138,142,233,0.35);
+  background: #fff;
+
+  font-size: 20px;
+  font-weight: 800;
+  font-family: "Nunito";
+  text-align: center;
+
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(138,142,233,0.18);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.pickMenu__item:hover{
+  background: #F3F4FF;
+  box-shadow: 0 8px 18px rgba(138,142,233,0.26);
+}
+
+.pickMenu__item:active{
+  transform: scale(0.98);
+}
+
+/* если вдруг где-то "button" тянет системные стили */
+.pickMenu__item{
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* =========================
+   ICON BUTTONS (TOOLS) — FIX
+   ставь в САМЫЙ НИЗ файла
+   ========================= */
+
+/* сетка на экране выбора инструмента (у тебя она в JSX есть, но в CSS не определена) */
+.grid3{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+@media (max-width: 720px){
+  .grid3{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px){
+  .grid3{ grid-template-columns: 1fr; }
+}
+
+/* сам IconButton */
+.iconBtn{
+  /* убираем “серый системный” вид */
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 100%;
+  min-height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 18px 16px;
+
+  border-radius: 12px;
+  border: 2px solid rgba(138,142,233,0.35);
+
+  background: #fff;
+  color: var(--text-color);
+
+  font-family: "Nunito";
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+
+  box-shadow: 0 6px 16px rgba(138,142,233,0.20);
+  cursor: pointer;
+
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.iconBtn:hover{
+  background: #F3F4FF;
+  border-color: rgba(138,142,233,0.45);
+  box-shadow: 0 8px 18px rgba(138,142,233,0.28);
+}
+
+.iconBtn:active{
+  transform: scale(0.98);
+}
+
+.iconBtn:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* иконка */
+.iconBtn__icon{
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* текстовый блок (у тебя он есть в JSX, но не был оформлен) */
+.iconBtn__text{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.iconBtn__title{
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.iconBtn__subtitle{
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* =========================
+   LINK BUTTON (Назад) — FIX
+   ставь в САМЫЙ НИЗ файла
+   ========================= */
+
+.linkBtn{
+  -webkit-appearance: none;
+  appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 16px;
+  border-radius: 10px;
+
+  border: 2px solid var(--accent);
+  background: #ffffff;
+  color: var(--accent);
+
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(138,142,233,0.25);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.linkBtn:hover{
+  background: #F3F4FF;
+  box-shadow: 0 5px 14px rgba(138,142,233,0.35);
+}
+
+.linkBtn:active{
+  transform: scale(0.98);
+  box-shadow: 0 3px 8px rgba(138,142,233,0.25);
+}
+/* =========================
+   CLICKABLE TOKENS (shared)
+   ========================= */
+
+/* базовое состояние */
+.token--clickable {
+  border: 2px solid rgba(138,142,233,0.45);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* hover — как в молотке */
+.token--clickable:hover {
+  background: #F3F4FF;
+  box-shadow: 0 0 0 3px rgba(138,142,233,0.18);
+}
+
+/* выбранное число */
+.token--clickable.token--picked {
+  border-color: rgba(138,142,233,0.9);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.22);
+}
+
+/* неактивная карточка */
+.exprCard--inactive .token--clickable {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* === MAGNET: locked/solved visual disable === */
+.exprCard--solved .magPick,
+.exprCard--solved .slot {
+  pointer-events: none;   /* на всякий */
+}
+
+.exprCard--solved .magPick {
+  cursor: default;
+  background: #fff;
+  box-shadow: none;
+  border-color: rgba(229,231,235,0.9); /* как обычная обводка */
+}
+
+/* убираем hover-эффект окончательно */
+.exprCard--solved .magPick:hover {
+  background: #fff;
+  box-shadow: none;
+}
+
+/* если донор/пикед задают “сильную” рамку — глушим и их */
+.exprCard--solved .magPick--donor,
+.exprCard--solved .magPick--picked {
+  box-shadow: none;
+  border-color: rgba(229,231,235,0.9);
+}
+
+/* на всякий: слот тоже не “как кнопка” */
+.exprCard--solved .slot {
+  cursor: default;
+}
+/* === MAGNET: solved state should look disabled (like wrench/hammer) === */
+.exprCard--solved .slot {
+  cursor: default;
+}
+
+.exprCard--solved .magPick {
+  pointer-events: none;        /* клики/ховеры */
+  cursor: default;
+
+  /* визуальный "disabled" */
+  background: rgba(17, 24, 39, 0.04);   /* лёгкая сероватая заливка */
+  border-color: rgba(229, 231, 235, 1); /* мягче обводка */
+  color: rgba(17, 24, 39, 0.55);        /* текст приглушён */
+
+  box-shadow: none;
+}
+
+.exprCard--solved .magPick:hover {
+  background: rgba(17, 24, 39, 0.04);
+  box-shadow: none;
+}
+
+/* если хочешь, чтобы "донор" тоже не выделялся после решения */
+.exprCard--solved .magPick--donor,
+.exprCard--solved .magPick--picked {
+  border-color: rgba(229, 231, 235, 1);
+  box-shadow: none;
+}
+
+/* === MAGNET / SOLVED: приглушаем всю строку выражения как в молотке === */
+.exprRow--solved .slot{
+  background: #f3f4f6;              /* лёгкая серая заливка на подложке */
+  border-color: rgba(17,24,39,0.06);
+}
+
+.exprRow--solved .token{
+  opacity: 0.65;                     /* числа бледнее */
+}
+
+.exprRow--solved .plus{
+  opacity: 0.45;                     /* знак тоже бледнее */
+}
+
+/* На всякий случай: когда решено — никаких hover/active эффектов на числе */
+.exprCard--solved .magPick,
+.exprCard--solved .slot{
+  pointer-events: none;
+  cursor: default;
+}
+
+.exprCard--solved .magPick:hover{
+  background: #fff;
+  box-shadow: none;
+}
+
+/* === MAGNET: solved — без серой заливки у чисел === */
+.magnetCard.exprCard--solved .token{
+  background: #fff;        /* возвращаем белый фон */
+}
+
+.magnetCard.exprCard--solved .slot{
+  background: transparent;
+}
+
+.magnetCard.exprCard--solved .exprSolvedMark{
+  background: #ecfdf5;          /* очень светлый зелёный */
+  color: #86efac;               /* бледно-зелёная галка */
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.exprCard--solved .exprEquals {
+  color: #9CA3AF; /* мягкий серый */
+  font-weight: 800; /* оставляем акцент */
+}
+
+/* =========================
+   ACTIONS (кнопка "Назад")
+   ========================= */
+
+.actions{
+  margin-top: 24px;
+}
+
+/* =========================
+   STATUS WARN — как hint (мягкая ошибка)
+   ========================= */
+.status--warn{
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: var(--error-bg); /* #FEF2F2 */
+  color: #991B1B;              /* приглушённый красный */
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  box-shadow: inset 0 -2px 0 rgba(239, 68, 68, 0.18);
+}
+
+/* =========================
+   SCALES (⚖️)
+   ========================= */
+
+.scalesRow{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.scaleSide{
+  position: relative;
+  width: 140px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  transition: transform 280ms ease;
+}
+
+.scaleCup{
+  margin-top: 6px;
+  opacity: 0.95;
+}
+
+/* === SCALES: chips in LEFT bowl (not inputs) === */
+.overlayLeft .cupChip{
+  background: #FFD1A3;          /* тёплый оранжевый, темнее чаши */
+  color: #1F2937;               /* тёмный текст */
+  border: none;                 /* убрать “инпутную” рамку */
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+}
+
+/* результат в левой чаше — чуть светлее, но всё ещё “чаша”, не инпут */
+.overlayLeft .cupChip--result{
+  background: #FFE2C4;
+}
+
+/* подсветка шага (когда число активно) */
+.overlayLeft .cupChip--hl{
+  background: #FD8B3F;          /* насыщеннее */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+}
+
+/* “физика”: правая чаша тяжелее -> вниз; левая -> вверх */
+.scaleSide--down{ transform: translateY(14px); }
+.scaleSide--up{ transform: translateY(-10px); }
+
+/* баланс (когда всё выровнялось) */
+.scaleSide--balanced{ transform: translateY(0); }
+
+.scaleNumWrap{
+  margin-top: 10px;
+}
+
+.scaleNum{
+  border: 2px solid rgba(229,231,235,1);
+}
+
+/* === SCALES: hint like MAGNET bubble === */
+.scalesOverlay .hint{
+  position: absolute;
+  top: -44px;                 /* как у magnetBubble */
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #e6f9ee;
+  color: #065f46;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: inset 0 -3px 0 rgba(16,185,129,0.25);
+
+  /* убрать старые эффекты белого hint */
+  border: none;
+}
+
+/* позиционирование над нужным инпутом */
+.scalesOverlay .hint--a{ left: 0%; }
+.scalesOverlay .hint--b{ left: 128; }
+
+/* кликабельное число (как в молотке — фиолетовая рамка) */
+.scaleNum--clickable{
+  border: 2px solid rgba(138,142,233,0.55);
+  box-shadow: 0 0 0 4px rgba(138,142,233,0.12);
+  cursor: pointer;
+  background: #fff;
+}
+
+/* отключаем клик после шага 0 */
+.scaleNum--disabled{
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* после переноса +1 — числа фиксируются */
+.scaleNum--locked{
+  opacity: 0.8;
+}
+
+.scaleOp{
+  font-size: 30px;
+  font-weight: 900;
+  opacity: 0.85;
+}
+
+.scalesPlusRow{
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plusToken{
+  width: 64px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid rgba(138,142,233,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  cursor: grab;
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(138,142,233,0.18);
+}
+
+.plusToken--dragging{
+  opacity: 0.7;
+}
+
+.scalesPlusHint{
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.scalesAnswerRow{
+  margin-top: 0;
+}
+
+/* =========================
+   SCALES (minimal)
+   ========================= */
+.scalesRow{
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.scalesBeam{
+  margin-top: 28px;
+  font-weight: 900;
+  font-size: 28px;
+  opacity: 0.35;
+}
+
+.scalesPan{
+  width: 180px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 2px dashed rgba(138,142,233,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.25s ease;
+}
+
+.scalesPan__label{
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.scalesPan--down{
+  transform: translateY(10px);
+}
+
+.scalesPan--locked{
+  pointer-events: none;
+}
+
+.scalesDragRow{
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scalesChip{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-width: 64px;
+  padding: 0 14px;
+
+  border-radius: 14px;
+  border: 2px solid rgba(138,142,233,0.45);
+  background: #fff;
+
+  font-weight: 900;
+  font-size: 18px;
+  cursor: grab;
+
+  box-shadow: 0 6px 14px rgba(138,142,233,0.18);
+}
+
+.scalesChip:active{
+  cursor: grabbing;
+}
+
+/* только этот хинт — зелёный */
+.exprHint--okOnly{
+  background: #e6f9ee;
+  color: #065f46;
+  box-shadow: inset 0 -3px 0 rgba(16,185,129,0.25);
+}
+/* === SCALES: result chip same bg as magnet ok input (NO text color change) === */
+.cupChip--result.cupChip--hl{
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  /* цвет текста намеренно НЕ меняем */
+}
+/* 1) главная строка: не переносить */
+.exprRow--main{
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;          /* если экран узкий — скролл вместо переноса */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 2) поджимаем "слоты" только в этой строке, иначе не влезет */
+.exprRow--main .slot{
+  padding: 6px;              /* было 8px */
+  min-width: 56px;           /* было 64px */
+}
+
+/* 3) блок ответа держим в одной линии */
+.exprInlineAnswer{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 4) чтобы инпут не пытался растянуться и ломать ряд */
+.exprInlineAnswer .answerInput{
+  width: 120px;              /* было 140px */
+  flex: 0 0 120px;
+  margin: 0;                 /* на всякий */
+}
+
+/* 5) кнопка тоже без сюрпризов */
+.exprInlineAnswer .btn-primary{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* FORCE: ответ всегда в этой же строке */
+.exprRow.exprRow--main{
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+
+/* запретить флекс-детям “съезжать” и переноситься */
+.exprRow.exprRow--main > *{
+  flex: 0 0 auto;
+}
+
+/* слоты тоже не должны сжиматься до переноса */
+.exprRow.exprRow--main .slot{
+  flex: 0 0 auto;
+}
+
+/* блок с инпутом и кнопкой — строго в одну линию */
+.exprRow.exprRow--main .exprInlineAnswer{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* чтобы инпут не сжимался и не “ломал” ряд */
+.exprRow.exprRow--main .answerInput{
+  flex: 0 0 120px;
+  width: 120px;
+}
+
+/* FORCE: "Ключ" — держим всё в одной строке */
+.exprRow.exprRow--main{
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* чтобы слоты не раздували строку */
+.exprRow.exprRow--main .slot{
+  min-width: 52px;      /* было 64 */
+  padding: 4px;         /* было 8 */
+}
+
+/* чтобы числа внутри слота тоже не раздували */
+.exprRow.exprRow--main .token{
+  min-width: 44px;      /* было 56 */
+  min-height: 44px;     /* было 56 */
+  font-size: 22px;      /* было 26 */
+}
+
+/* КЛЮЧ: делаем знаки такого же размера, как числа */
+.exprRow.exprRow--main .plus{
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 800; /* чтобы выглядел как раньше */
+}
+
+/* КЛЮЧ: "=" тоже тем же размером (у тебя глобально 34px) */
+.exprRow.exprRow--main .exprEquals{
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900; /* оставим жирным */
+  margin-left: 10px; /* можешь оставить как было */
+}
+
+/* блок "ответ + кнопка" всегда в одну линию */
+.exprRow.exprRow--main .exprInlineAnswer{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* инпут и кнопка не растягиваются и не ломают ряд */
+.exprRow.exprRow--main .exprInlineAnswer .answerInput{
+  width: 110px;
+  flex: 0 0 110px;
+}
+
+.exprRow.exprRow--main .exprInlineAnswer .btn-primary{
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* =========================
+   RESCUE WORKSHOP — EXPRESSIONS
+   ========================= */
+
+/* ===== Миссия как блок ===== */
+.rescueMission{
+  padding: 18px 0 10px;
+  border-top: 1px solid rgba(229,231,235,0.9);
+}
+
+.rescueMission:first-child{
+  border-top: none;
+  padding-top: 0;
+}
+
+/* решённые / прошлые миссии */
+.rescueMission--done{
+  pointer-events: none;
+}
+
+/* ===== Исходное выражение ===== */
+.rescueExpression{
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+
+  margin: 6px 0 14px;
+
+  /* активное (ещё не решено) */
+  color: rgba(17, 24, 39, 0.85);
+}
+
+/* выражение у решённой миссии */
+.rescueMission--done .rescueExpression{
+  color: rgba(17, 24, 39, 0.45);
+}
+
+/* ===== “Влипшее” решение ===== */
+.rescueSolvedBlock{
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  column-gap: 16px;
+
+  align-items: center; /* галочка строго по центру между строками */
+  margin: 8px 0 10px;
+}
+
+/* галочка */
+.rescueSolvedCheck{
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eaf7ef;
+  color: #22c55e;
+
+  font-size: 28px;
+  font-weight: 900;
+}
+
+/* контейнер двух строк */
+.rescueSolvedContent{
+  display: grid;
+  row-gap: 8px;
+}
+
+/* строка с результатом */
+.rescueSolvedText{
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.15;
+
+  color: rgba(17, 24, 39, 0.45);
+}
+
+/* ===== Хинт под неправильным инструментом ===== */
+.toolHint{
+  margin-top: 14px;
+  padding: 10px 12px;
+
+  border-radius: 12px;
+  background: #FEF2F2;
+  color: #991B1B;
+
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+
+  box-shadow: inset 0 -2px 0 rgba(239, 68, 68, 0.18);
+  text-align: center;
+}
+
+/* ===== Адаптив ===== */
+@media (max-width: 600px){
+  .rescueExpression,
+  .rescueSolvedText{
+    font-size: 28px;
+  }
+
+  .rescueSolvedCheck{
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+}
+/* =========================
+   RESCUE — back circle button
+   ========================= */
+
+.taskHeader.taskHeader--withBack{
+  display: flex;
+  align-items: flex-start;   /* теперь не центр, а верх */
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+/* заголовок чуть опускаем */
+.taskHeader.taskHeader--withBack .h1{
+  margin: 6px 0 0;   /* было 0 */
+}
+
+/* кнопка НЕ absolute */
+.circleBackBtn{
+  flex: 0 0 auto;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+
+  border: 2px solid var(--accent);
+  background: #fff;
+  color: var(--accent);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+  font-weight: 900;
+
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(138,142,233,0.25);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.circleBackBtn:hover{
+  background: #F3F4FF;
+  box-shadow: 0 5px 14px rgba(138,142,233,0.35);
+}
+
+.circleBackBtn:active{
+  transform: scale(0.96);
+  box-shadow: 0 3px 8px rgba(138,142,233,0.25);
+}
