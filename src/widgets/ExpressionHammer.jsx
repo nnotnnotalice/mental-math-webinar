@@ -116,9 +116,9 @@ React.useEffect(() => {
 
   // Чтобы после решения не было активной обводки, просто считаем active = isActive && !solved
   const cardClass =
-    "exprCard " +
-    (isActive && !solved ? "exprCard--active" : "exprCard--inactive");
-
+  "exprCard hammerCard " +
+  (isActive && !solved ? "exprCard--active" : "exprCard--inactive");
+  
   return (
   <div
     className={cardClass + (solved ? " exprCard--withMark" : "")}

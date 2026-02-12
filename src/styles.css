@@ -39,7 +39,6 @@ button, input, textarea, select { font-family: inherit; }
 /* =========================
    APP SHELL
    ========================= */
-.app { min-height: 100vh; display: flex; flex-direction: column; }
 
 .topbar{
   background: var(--accent);
@@ -60,7 +59,6 @@ button, input, textarea, select { font-family: inherit; }
 
 .content{
   padding: 18px 14px 0;
-  padding-bottom: calc(var(--footer-h) + 16px);
   max-width: 980px;
   width: 100%;
   margin: 0 auto;
@@ -266,12 +264,19 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 .cupInput--hl{
-  border-color: rgba(138,142,233,0.95);
-  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  box-shadow: 0 0 0 4px rgba(34,197,94,0.18);
+  color: #111827;
 }
 
+/* SCALES: одинаковая белая заливка на iOS/Android */
 .cupInput--locked{
-  opacity: 0.85;
+  opacity: 1; /* важно: НЕ приглушаем через opacity */
+  background: rgba(255,255,255,0.95); /* или просто #fff */
+  color: rgba(17,24,39,0.55);
+  border-color: rgba(86,145,240,0.20);
+  box-shadow: none;
 }
 
 .cupChip{
@@ -455,7 +460,7 @@ button, input, textarea, select { font-family: inherit; }
 /* Левая чаша: выражение a-b= */
 .overlayLeft{
   position: absolute;
-  left:3%;
+  left:2%;
   top: 4%;
   font-family: Nunito;
   font-size: 40px;
@@ -518,12 +523,10 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 .cupInput--hl{
-  border-color: rgba(138,142,233,0.95);
-  box-shadow: 0 0 0 4px rgba(138,142,233,0.18);
-}
-
-.cupInput--locked{
-  opacity: 0.85;
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  box-shadow: 0 0 0 4px rgba(34,197,94,0.18);
+  color: #111827;
 }
 
 .cupChip{
@@ -1487,8 +1490,8 @@ button, input, textarea, select { font-family: inherit; }
 
 /* подсветка шага (когда число активно) */
 .overlayLeft .cupChip--hl{
-  background: #FD8B3F;          /* насыщеннее */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+  background: #e6f9ee;          /* насыщеннее */
+  box-shadow: 0 4px 10px rgba(2, 58, 32, 0.18);
 }
 
 /* “физика”: правая чаша тяжелее -> вниз; левая -> вверх */
@@ -1509,12 +1512,12 @@ button, input, textarea, select { font-family: inherit; }
 /* === SCALES: hint like MAGNET bubble === */
 .scalesOverlay .hint{
   position: absolute;
-  top: -44px;                 /* как у magnetBubble */
-  padding: 10px 12px;
+  top: -65px;                 /* как у magnetBubble */
+  padding: 16px 18px;
   border-radius: 14px;
   background: #e6f9ee;
   color: #065f46;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 800;
   white-space: nowrap;
   box-shadow: inset 0 -3px 0 rgba(16,185,129,0.25);
@@ -1524,8 +1527,8 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 /* позиционирование над нужным инпутом */
-.scalesOverlay .hint--a{ left: 0%; }
-.scalesOverlay .hint--b{ left: 128px; }
+.scalesOverlay .hint--a{ left: -2%; }
+.scalesOverlay .hint--b{ left: 110px; }
 
 /* кликабельное число (как в молотке — фиолетовая рамка) */
 .scaleNum--clickable{
@@ -1929,11 +1932,9 @@ button, input, textarea, select { font-family: inherit; }
 /* кнопка НЕ absolute */
 .circleBackBtn{
   flex: 0 0 auto;
-
   width: 44px;
   height: 44px;
   border-radius: 50%;
-
   border: 2px solid var(--accent);
   background: #fff;
   color: var(--accent);
@@ -1942,12 +1943,14 @@ button, input, textarea, select { font-family: inherit; }
   align-items: center;
   justify-content: center;
 
-  font-size: 20px;
-  font-weight: 900;
-
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(138,142,233,0.25);
   transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.circleBackBtn__icon{
+  width: 24px;
+  height: 24px;
 }
 
 .circleBackBtn:hover{
@@ -2047,7 +2050,7 @@ button, input, textarea, select { font-family: inherit; }
 @media (max-width: 480px) and (orientation: portrait){
 
   .scalesOverlay .hint{
-    top: -42px;        /* можно чуть ниже/выше */
+    top: -70px;        /* можно чуть ниже/выше */
   }
 
   /* если нужно двигать конкретно 9+1 */
@@ -2260,21 +2263,6 @@ button, input, textarea, select { font-family: inherit; }
    ========================= */
 @media (max-width: 520px) and (orientation: portrait){
 
-  .exprCard .token--picked{
-    transform: translateY(-1px) scale(1.03);
-    background: #EEF2FF;
-    border: 2px solid rgba(138,142,233,0.95);
-    box-shadow:
-      0 10px 20px rgba(138,142,233,0.22),
-      0 0 0 4px rgba(138,142,233,0.18);
-  }
-
-  .exprCard .slot--picked{
-    border-radius: 16px;
-  }
-
-  @media (max-width: 520px) and (orientation: portrait){
-
   /* выбранная кнопка — активная */
   .exprCard .token--picked{
     transform: translateY(-4px) scale(1.06);
@@ -2286,7 +2274,7 @@ button, input, textarea, select { font-family: inherit; }
     transition: all .2s ease;
   }
 
-  /* цели — мягкая живая пульсация */
+  /* цели — пульсация */
   .exprCard .slot--target{
     border-radius: 16px;
     animation: glowPulse 1s ease-in-out infinite;
@@ -2306,8 +2294,6 @@ button, input, textarea, select { font-family: inherit; }
       transform: scale(1);
     }
   }
-
-}
 
   .exprCard .slot{
     -webkit-tap-highlight-color: transparent;
@@ -2418,4 +2404,298 @@ button, input, textarea, select { font-family: inherit; }
     flex: 0 0 42px !important; /* не растягиваться */
   }
 }
+/* =========================
+   ROTATE GATE — show only on mobile landscape
+   ========================= */
 
+/* по умолчанию скрыто */
+.rotateGate {
+  display: none;
+}
+
+/* включаем на мобилках в landscape */
+@media (max-width: 900px) and (orientation: landscape) {
+  .rotateGate {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: #f3f6ff; /* можно белый */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* Блокируем клики ТОЛЬКО у основного UI под заглушкой */
+  .topbar,
+  .content,
+  .footerNav {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* А заглушка должна быть кликабельной */
+  .rotateGate,
+  .rotateGate * {
+    pointer-events: auto;
+  }
+  .rotateGate{
+    touch-action: none; /* чтобы не было случайных жестов */
+  }
+  .rotateGate__card {
+    width: min(520px, 92vw);
+    background: #fff;
+    border: 2px solid rgba(138, 142, 233, 0.35);
+    border-radius: 20px;
+    padding: 18px 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+    text-align: center;
+  }
+
+  .rotateGate__title {
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: #111827;
+  }
+
+  .rotateGate__text {
+    font-size: 16px;
+    color: #6b7280;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 520px) and (orientation: portrait){
+  .panel--task .exprCard.hammerCard{
+    overflow: visible !important;
+  }
+}
+
+/* =========================
+   HAMMER — MOBILE: fit rows in one line
+   (put at the very end)
+   ========================= */
+@media (max-width: 900px){
+
+  /* 0) меньше воздуха сверху внутри карточки молотка */
+  .exprCard.hammerCard{
+    padding-top: 6px !important;  /* было больше */
+  }
+
+  /* 1) строка выражения — плотнее, без переноса */
+  .exprCard.hammerCard .exprRow{
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* 2) квадраты под числа (и обычные, и кликабельные) */
+  .exprCard.hammerCard .token,
+  .exprCard.hammerCard .pickToken{
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 8px !important;
+    border-radius: 12px !important;
+
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+
+  /* 3) знаки + / - и = — тоже под размер */
+  .exprCard.hammerCard .plus,
+  .exprCard.hammerCard .exprEquals{
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    margin: 0 2px !important;
+  }
+
+  /* 4) инпут = по размеру как токен */
+  .exprCard.hammerCard .answerInput{
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+
+    padding: 0 !important;
+    border-radius: 12px !important;
+
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+
+    flex: 0 0 44px !important;
+  }
+
+  /* 5) чтобы expanded-строка тоже не разваливалась */
+  .exprCard.hammerCard .exprRow--expanded{
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* iOS любит переопределять disabled/readonly */
+.cupInput:disabled,
+.cupInput[readonly]{
+  opacity: 1;
+  -webkit-text-fill-color: rgba(17,24,39,0.55);
+  background: rgba(255,255,255,0.95);
+}
+
+/* =========================
+   SCALES — MOBILE: bigger hints
+   ========================= */
+@media (max-width: 520px){
+
+  .scalesOverlay .hint{
+    font-size: 24px !important;     /* было ~14px */
+    padding: 14px 18px !important;  /* было 10px 12px */
+    border-radius: 16px !important;
+    box-shadow: inset 0 -3px 0 rgba(16,185,129,0.35);
+  }
+
+   .scalesOverlay .hint--a{
+    left: -20px !important;
+  }
+
+  .scalesOverlay .hint--b{
+    left: 58px !important;   /* уменьшаем значение */
+  }
+}
+
+/* ✅ correct input stays green even if readonly/disabled (SCALES + MAGNET) */
+.cupInput.cupInput--hl[readonly],
+.cupInput.cupInput--hl:disabled,
+.cupInput.magnetInput--ok[readonly],
+.cupInput.magnetInput--ok:disabled{
+  background: var(--ok-bg) !important;
+  border-color: var(--ok-border) !important;
+  -webkit-text-fill-color: #111827 !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+.footerNav{
+  will-change: transform;
+  transition: transform 200ms ease;
+}
+
+/* когда клавиатура открыта — прячем нижние кнопки, чтобы не слипалось с весами */
+html.kbd-open .footerNav{
+  transform: translate3d(0, 110%, 0);
+}
+
+/* добавляем место под клавиатуру (контент “как в iOS” уходит вверх) */
+html.kbd-open .content{
+  padding-bottom: calc(var(--kb, 0px) + 16px);
+}
+
+/* =========================
+   RESCUE — smaller solved expressions on MOBILE
+   ========================= */
+@media (max-width: 600px){
+
+  /* верхняя строка у решённой миссии */
+  .rescueMission--done .rescueExpression{
+    font-size: 22px !important;
+    line-height: 1.12;
+  }
+
+  /* нижняя строка решения */
+  .rescueMission--done .rescueSolvedText{
+    font-size: 22px !important;
+    line-height: 1.12;
+  }
+
+}
+
+/* ===== APP: scroll only inside .content (prevents Android keyboard jump) ===== */
+html, body { height: 100%; }
+
+body{
+  overflow: hidden; /* страница не скроллится — скроллим только .content */
+}
+
+/* приложение занимает видимую часть экрана */
+.app{
+  height: calc(var(--vvh, 1vh) * 100); /* лучший вариант с твоим visualViewport */
+  display: flex;
+  flex-direction: column;
+}
+
+/* по умолчанию — как было (Android/desktop) */
+.content{
+  padding-bottom: calc(var(--footer-h) + var(--kb, 0px) + 16px);
+}
+
+/* iOS: НЕ добавляем kb в padding (иначе белая полоса растёт) */
+html.ios .content{
+  padding-bottom: calc(var(--footer-h) + 16px);
+}
+
+/* iOS: когда клава открыта — футер скрыт, значит footer-h тоже не нужен */
+html.ios.kbd-open .content{
+  padding-bottom: 16px;
+}
+.app, .content{
+  background: #fff;
+}
+
+/* FOOTER: реально к низу + safe-area */
+.footerNav{
+  bottom: 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}
+
+/* чтобы панель точно не перекрывала контент */
+.panel--task{
+  padding-bottom: calc(var(--footer-h) + 16px + env(safe-area-inset-bottom));
+}
+
+/* чтобы scrollIntoView не прятал виджет под fixed footer */
+.exprCard{
+  scroll-margin-bottom: calc(var(--footer-h) + 24px + env(safe-area-inset-bottom));
+}
+
+/* =========================
+   iOS + widgets: footer goes AFTER last widget (no reserved space)
+   PUT THIS AT THE VERY END OF CSS
+   ========================= */
+
+html.ios.widgets{
+  /* убиваем смысл "высоты футера" на этих экранах */
+  --footer-h: 0px;
+}
+
+/* 1) футер становится обычным блоком + убираем любые "уезды" */
+html.ios.widgets .footerNav{
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: none !important;          /* <-- важно! (kbd-open мог двигать) */
+  will-change: auto !important;
+  transition: none !important;
+
+  width: 100%;
+  margin-top: 12px;                    /* можно 0 если надо “вплотную” */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}
+
+/* 2) убираем резерв под fixed-footer в контейнерах */
+html.ios.widgets .content{
+  padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+}
+
+html.ios.widgets .panel--task{
+  padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+}
+
+/* 3) на всякий: чтобы scrollIntoView не оставлял лишний запас */
+html.ios.widgets .exprCard{
+  scroll-margin-bottom: 16px !important;
+}

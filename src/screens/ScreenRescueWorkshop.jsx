@@ -72,6 +72,27 @@ export default function ScreenRescueWorkshop() {
   const [badPickByIdx, setBadPickByIdx] = React.useState({});
   const [solvedByIdx, setSolvedByIdx] = React.useState({});
 
+  const panelRef = React.useRef(null);
+  const headerRef = React.useRef(null);
+  const missionRefs = React.useRef([]);
+
+  const [headerH, setHeaderH] = React.useState(0);
+
+  React.useLayoutEffect(() => {
+    const measure = () => {
+      const h = headerRef.current?.getBoundingClientRect().height ?? 0;
+      setHeaderH(Math.ceil(h));
+    };
+    measure();
+
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, []);
+
   function goBack() {
     navigate(`/tools/${encodeURIComponent(grade)}`);
   }
@@ -108,23 +129,102 @@ export default function ScreenRescueWorkshop() {
   const visibleTasks =
     activeIndex >= tasks.length ? tasks : tasks.slice(0, activeIndex + 1);
 
+  // -----------------------------
+  // Scroll helpers (ONLY inside .content)
+  // -----------------------------
+  const getScroller = () => document.querySelector(".content");
+
+  const scrollByInsideContent = React.useCallback((delta) => {
+    const scroller = getScroller();
+    if (!scroller) return;
+    scroller.scrollTo({
+      top: scroller.scrollTop + delta,
+      behavior: "smooth",
+    });
+  }, []);
+
+  // докрутка вниз, чтобы элемент полностью влез по низу (меню/выпадашка)
+  const ensureFullyVisibleAtBottom = React.useCallback(
+    (el) => {
+      if (!el) return;
+
+      const vv = window.visualViewport;
+      const viewH = vv?.height ?? window.innerHeight;
+
+      const footer = document.querySelector(".footerNav");
+      const footerTop = footer?.getBoundingClientRect().top ?? viewH;
+      const usableBottom = Math.min(viewH, footerTop);
+
+      const r = el.getBoundingClientRect();
+      const padding = 12;
+
+      const overflowBottom = r.bottom - usableBottom + padding;
+      if (overflowBottom > 0) scrollByInsideContent(overflowBottom);
+    },
+    [scrollByInsideContent]
+  );
+
+  // переход к следующей миссии: просто scrollIntoView,
+  // а “чтобы не под шапку” решаем scroll-margin-top (см. ниже)
+  React.useEffect(() => {
+    const nextEl = missionRefs.current[activeIndex];
+    if (!nextEl) return;
+
+    const t = setTimeout(() => {
+      nextEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+
+    return () => clearTimeout(t);
+  }, [activeIndex]);
+
+  // следим за появлением pickMenu (молоток) и докручиваем ТОЛЬКО ВНИЗ
+  React.useEffect(() => {
+    const root = panelRef.current;
+    if (!root) return;
+
+    const mo = new MutationObserver(() => {
+      const menu = root.querySelector(".pickMenu");
+      if (menu) ensureFullyVisibleAtBottom(menu);
+    });
+
+    mo.observe(root, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [ensureFullyVisibleAtBottom]);
+
   return (
-    <section className="panel panel--task">
-      {/* HEADER */}
-      <div className="taskHeader taskHeader--withBack">
-        <button
-          type="button"
-          className="circleBackBtn"
-          onClick={goBack}
-          aria-label="Назад"
-        >
-          ←
+    <section ref={panelRef} className="panel panel--task rescueWorkshop">
+      {/* HEADER — sticky, чтобы назад не пропадал */}
+      <div
+        ref={headerRef}
+        className="taskHeader taskHeader--withBack"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          background: "#fff",
+          paddingTop: 6,
+          paddingBottom: 6,
+          borderBottom: "1px solid rgba(229,231,235,0.9)",
+        }}
+      >
+        <button type="button" className="circleBackBtn" onClick={goBack}>
+          <svg
+            className="circleBackBtn__icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </button>
 
         <div className="h1">Выбери инструмент, чтобы решить выражение</div>
       </div>
 
-      {/* BODY — начинается по тому же левому краю, что и заголовок */}
+      {/* BODY */}
       <div className="rescueBody">
         <div className="stack">
           {visibleTasks.map((task, idx) => {
@@ -146,9 +246,14 @@ export default function ScreenRescueWorkshop() {
             return (
               <div
                 key={task.id || idx}
-                className={"rescueMission " + (isPast ? "rescueMission--done" : "")}
+                ref={(el) => (missionRefs.current[idx] = el)}
+                className={
+                  "rescueMission " + (isPast ? "rescueMission--done" : "")
+                }
+                // ✅ ВОТ ЭТО КЛЮЧ: чтобы выражение не уезжало под sticky header
+                style={{ scrollMarginTop: headerH + 12 }}
               >
-                {/* ✅ РЕЗУЛЬТАТ (“влипший”) */}
+                {/* ✅ РЕЗУЛЬТАТ */}
                 {solvedInfo ? (
                   <div className="rescueSolvedBlock">
                     <div className="rescueSolvedCheck" aria-hidden="true">
@@ -157,9 +262,9 @@ export default function ScreenRescueWorkshop() {
 
                     <div className="rescueSolvedContent">
                       <div className="rescueExpression rescueExpression--done">
-  {task.label}{" "}
-  = {String(solvedInfo.line).split("=").pop().trim()}
-</div>
+                        {task.label} ={" "}
+                        {String(solvedInfo.line).split("=").pop().trim()}
+                      </div>
                       <div className="rescueSolvedText">{solvedInfo.line}</div>
                     </div>
                   </div>
@@ -171,7 +276,10 @@ export default function ScreenRescueWorkshop() {
                     <div className="rescueExpression">{task.label}</div>
 
                     {isCurrent ? (
-                      <div className="grid3" style={{ marginTop: 8, marginBottom: 16 }}>
+                      <div
+                        className="grid3"
+                        style={{ marginTop: 8, marginBottom: 16 }}
+                      >
                         {offered.includes("wrench") ? (
                           <div>
                             <IconButton
@@ -180,7 +288,9 @@ export default function ScreenRescueWorkshop() {
                               onClick={() => chooseTool(idx, "wrench", task)}
                             />
                             {badPick === "wrench" ? (
-                              <div className="toolHint">Этот инструмент не подходит</div>
+                              <div className="toolHint">
+                                Этот инструмент не подходит
+                              </div>
                             ) : null}
                           </div>
                         ) : null}
@@ -193,7 +303,9 @@ export default function ScreenRescueWorkshop() {
                               onClick={() => chooseTool(idx, "hammer", task)}
                             />
                             {badPick === "hammer" ? (
-                              <div className="toolHint">Этот инструмент не подходит</div>
+                              <div className="toolHint">
+                                Этот инструмент не подходит
+                              </div>
                             ) : null}
                           </div>
                         ) : null}
@@ -206,7 +318,9 @@ export default function ScreenRescueWorkshop() {
                               onClick={() => chooseTool(idx, "magnet", task)}
                             />
                             {badPick === "magnet" ? (
-                              <div className="toolHint">Этот инструмент не подходит</div>
+                              <div className="toolHint">
+                                Этот инструмент не подходит
+                              </div>
                             ) : null}
                           </div>
                         ) : null}
@@ -219,7 +333,9 @@ export default function ScreenRescueWorkshop() {
                               onClick={() => chooseTool(idx, "scales", task)}
                             />
                             {badPick === "scales" ? (
-                              <div className="toolHint">Этот инструмент не подходит</div>
+                              <div className="toolHint">
+                                Этот инструмент не подходит
+                              </div>
                             ) : null}
                           </div>
                         ) : null}
@@ -327,7 +443,7 @@ const TASKS_12 = [
     label: "13 − 9",
     offeredTools: ["scales", "hammer", "wrench"],
     scales: {
-      label: "⚖️ Добавь 1 к уменьшаемому и вычитаемому. Вычисли",
+      label: "⚖️ Запиши новое выражение. Вычисли",
       a: 13,
       b: 9,
     },
@@ -387,7 +503,7 @@ const TASKS_34 = [
     label: "285 − 29",
     offeredTools: ["scales", "wrench"],
     scales: {
-      label: "⚖️ Добавь 1 к уменьшаемому и вычитаемому. Вычисли",
+      label: "⚖️ Запиши новое выражение. Вычисли",
       a: 285,
       b: 29,
     },

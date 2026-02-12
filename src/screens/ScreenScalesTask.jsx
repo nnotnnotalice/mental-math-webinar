@@ -17,6 +17,28 @@ function pickNext(pool, prevId) {
   return next;
 }
 
+function getFooterPx() {
+  // читаем CSS var --footer-h с :root
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--footer-h")
+    .trim();
+
+  const n = parseFloat(raw);
+  const footerH = Number.isFinite(n) ? n : 96;
+
+  // safe-area для iOS
+  // env() нельзя прочитать напрямую, но можно измерить через тест-элемент
+  const probe = document.createElement("div");
+  probe.style.cssText =
+    "position:fixed;left:0;right:0;bottom:0;height:constant(safe-area-inset-bottom);height:env(safe-area-inset-bottom);pointer-events:none;opacity:0;";
+  document.body.appendChild(probe);
+  const safe = probe.getBoundingClientRect().height || 0;
+  document.body.removeChild(probe);
+
+  // небольшой запас, чтобы точно не прилипало
+  return footerH + safe + 16;
+}
+
 export default function ScreenScalesTask() {
   const { grade } = useParams();
 
@@ -38,7 +60,7 @@ export default function ScreenScalesTask() {
   const cfg = React.useMemo(
     () => ({
       title: "⚖️ Вычисли удобным способом",
-      hint: "Запиши новое выражение и вычисли",
+      hint: "Запиши новое выражение. Вычисли",
     }),
     []
   );
@@ -50,6 +72,9 @@ export default function ScreenScalesTask() {
   // ключ нужен, чтобы ExpressionScales гарантированно сбрасывался при смене примера
   const [taskKey, setTaskKey] = React.useState(1);
 
+  // ref на блок с кнопкой "Решать ещё"
+  const nextBtnWrapRef = React.useRef(null);
+
   // если сменили grade → сбросить на новый пул
   React.useEffect(() => {
     const first = pickNext(pool, null);
@@ -59,10 +84,69 @@ export default function ScreenScalesTask() {
     setTaskKey((k) => k + 1);
   }, [pool]);
 
+  const scrollToNextButton = React.useCallback(() => {
+    const scroller = document.querySelector(".content"); // твой scroll container
+    const target = nextBtnWrapRef.current;
+    if (!scroller || !target) return;
+
+    const footerPx = getFooterPx();
+
+    // ждём, чтобы:
+    // 1) появилась кнопка
+    // 2) пересчитались высоты
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const scrollerRect = scroller.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        // хотим, чтобы низ кнопки был ВЫШЕ низа видимой области на footerPx
+        const visibleBottom = scrollerRect.bottom - footerPx;
+        const delta = targetRect.bottom - visibleBottom;
+
+        if (delta > 0) {
+          const nextTop = scroller.scrollTop + delta;
+          scroller.scrollTo({ top: nextTop, behavior: "smooth" });
+        } else {
+          // если уже влезает — всё равно чуть подтянем "в безопасную зону"
+          // чтобы не было ощущения, что кнопку подпирает футер
+          const bump = 8;
+          scroller.scrollTo({
+            top: Math.max(0, scroller.scrollTop - bump),
+            behavior: "smooth",
+          });
+        }
+      });
+    });
+
+    // страховка: на iOS visualViewport иногда меняет высоту чуть позже
+    setTimeout(() => {
+      const scroller2 = document.querySelector(".content");
+      const target2 = nextBtnWrapRef.current;
+      if (!scroller2 || !target2) return;
+
+      const footerPx2 = getFooterPx();
+      const scrollerRect2 = scroller2.getBoundingClientRect();
+      const targetRect2 = target2.getBoundingClientRect();
+
+      const visibleBottom2 = scrollerRect2.bottom - footerPx2;
+      const delta2 = targetRect2.bottom - visibleBottom2;
+
+      if (delta2 > 0) {
+        scroller2.scrollTo({
+          top: scroller2.scrollTop + delta2,
+          behavior: "smooth",
+        });
+      }
+    }, 180);
+  }, []);
+
   function handleSolved() {
-  setSolved(true);
-  setSolvedCount((c) => c + 1);
-}
+    setSolved(true);
+    setSolvedCount((c) => c + 1);
+
+    // кнопка появится после рендера — скроллим сразу после
+    setTimeout(scrollToNextButton, 0);
+  }
 
   function handleNext() {
     const next = pickNext(pool, current?.id ?? null);
@@ -95,12 +179,26 @@ export default function ScreenScalesTask() {
 
       {/* Кнопка "Решать ещё" появляется только после решения */}
       {solved && solvedCount < 2 ? (
-  <div className="answerRow" style={{ marginTop: 16 }}>
-    <button className="btn-primary" type="button" onClick={handleNext}>
-      Решать ещё
-    </button>
-  </div>
-) : null}
+        <>
+          <div
+            ref={nextBtnWrapRef}
+            className="answerRow"
+            style={{ marginTop: 16 }}
+          >
+            <button className="btn-primary" type="button" onClick={handleNext}>
+              Решать ещё
+            </button>
+          </div>
+
+          {/* КЛЮЧ: запас снизу, чтобы можно было реально докрутить кнопку над fixed футером */}
+          <div
+            aria-hidden="true"
+            style={{
+              height: "calc(var(--footer-h) + 28px + env(safe-area-inset-bottom))",
+            }}
+          />
+        </>
+      ) : null}
 
       <FooterNav />
     </section>

@@ -19,14 +19,23 @@ export default function ScreenChooseTool() {
   return (
   <section className="panel">
     <div className="taskHeader taskHeader--withBack">
-      <button
-        type="button"
-        className="circleBackBtn"
-        onClick={() => nav("/grade")}
-        aria-label="Назад"
-      >
-        ←
-      </button>
+    <button
+  type="button"
+  className="circleBackBtn"
+  onClick={() => nav("/grade")}
+>
+  <svg
+    className="circleBackBtn__icon"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+</button>
 
       <h1 className="h1">Выбери инструмент</h1>
     </div>
