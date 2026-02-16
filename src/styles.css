@@ -2699,13 +2699,3 @@ html.ios.widgets .panel--task{
 html.ios.widgets .exprCard{
   scroll-margin-bottom: 16px !important;
 }
-/* =========================
-   SCALES — shift left bowl on tablet & desktop
-   ========================= */
-@media (min-width: 600px){
-
-  .overlayLeft{
-    left: 3% !important;   /* подбирай 5–8% */
-  }
-
-}
