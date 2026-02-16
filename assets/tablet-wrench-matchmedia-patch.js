@@ -2,7 +2,10 @@
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
 
   const nativeMatchMedia = window.matchMedia.bind(window);
-  const targetQuery = '(max-width: 520px) and (orientation: portrait)';
+  const forcedQueries = [
+    '(max-width: 520px) and (orientation: portrait)',
+    '(pointer: coarse) and (orientation: portrait)',
+  ];
 
   const normalize = (q) => String(q || '').replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -17,6 +20,8 @@
 
     return (hasTouch || coarse) && (tabletLike || uaTablet);
   };
+
+  const shouldForce = (query) => forcedQueries.some((item) => normalize(query) === normalize(item));
 
   const createForcedMql = (query) => {
     const listeners = new Set();
@@ -63,7 +68,7 @@
   };
 
   window.matchMedia = function patchedMatchMedia(query) {
-    if (normalize(query) === normalize(targetQuery)) {
+    if (shouldForce(query)) {
       return createForcedMql(query);
     }
     return nativeMatchMedia(query);
