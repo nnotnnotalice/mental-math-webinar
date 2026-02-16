@@ -12,3 +12,24 @@
 .content{padding-bottom:calc(var(--footer-h) + var(--kb, 0px) + 48px)}
 .panel--task{padding-bottom:calc(var(--footer-h) + 48px + env(safe-area-inset-bottom))}
 .exprCard{scroll-margin-bottom:calc(var(--footer-h) + 56px + env(safe-area-inset-bottom))}
+
+/* Keep task screen scrollable on mobile so native/custom dropdowns are fully reachable. */
+body{overflow-x:hidden;overflow-y:auto}
+.app{min-height:0}
+.content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* Dropdown menu in expression cards should never be visually clipped on phones. */
+@media(max-width:700px){
+  .panel--task .exprCard{overflow:visible}
+  .pickMenu{max-height:min(56vh,360px);overflow-y:auto}
+}
+
+/* "Key" mechanic buttons on tablets: same mobile emphasis (pulse + outline). */
+@media(min-width:521px) and (max-width:1024px){
+  .rescueMission .pickToken,
+  .panel--task .pickToken{
+    border:2px solid rgba(138,142,233,1)!important;
+    box-shadow:0 0 0 4px rgba(138,142,233,.22),0 12px 24px rgba(138,142,233,.35)!important;
+    animation:glowPulse 1s ease-in-out infinite;
+  }
+}
