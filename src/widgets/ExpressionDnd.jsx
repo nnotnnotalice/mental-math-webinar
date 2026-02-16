@@ -30,46 +30,28 @@ export default function ExpressionDnd({
   const interactive = isActive && !solved;
   const inputRef = useRef(null);
 
-  // ✅ IMPORTANT: tap mode (phone + tablet) must react to resize/orientation changes
+  // ✅ IMPORTANT: isMobile must react to resize/orientation changes
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mqTabletOrPhone = window.matchMedia("(max-width: 1024px)");
-    const mqCoarse = window.matchMedia("(pointer: coarse)");
-
-    const update = () => {
-      const hasTouch =
-        "ontouchstart" in window ||
-        (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0);
-
-      setIsMobile(
-        !!mqTabletOrPhone.matches && (!!mqCoarse.matches || hasTouch)
-      );
-    };
+    const mq = window.matchMedia(
+      "(max-width: 520px) and (orientation: portrait)"
+    );
+    const update = () => setIsMobile(!!mq.matches);
 
     update();
 
     // Safari < 14 uses addListener/removeListener
-    if (mqTabletOrPhone.addEventListener) {
-      mqTabletOrPhone.addEventListener("change", update);
-      mqCoarse.addEventListener("change", update);
-    } else {
-      mqTabletOrPhone.addListener(update);
-      mqCoarse.addListener(update);
-    }
+    if (mq.addEventListener) mq.addEventListener("change", update);
+    else mq.addListener(update);
 
     window.addEventListener("resize", update);
     window.addEventListener("orientationchange", update);
 
     return () => {
-      if (mqTabletOrPhone.removeEventListener) {
-        mqTabletOrPhone.removeEventListener("change", update);
-        mqCoarse.removeEventListener("change", update);
-      } else {
-        mqTabletOrPhone.removeListener(update);
-        mqCoarse.removeListener(update);
-      }
+      if (mq.removeEventListener) mq.removeEventListener("change", update);
+      else mq.removeListener(update);
 
       window.removeEventListener("resize", update);
       window.removeEventListener("orientationchange", update);
