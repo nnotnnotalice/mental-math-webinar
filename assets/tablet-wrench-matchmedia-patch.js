@@ -18,6 +18,45 @@
     return (hasTouch || coarse) && (tabletLike || uaTablet);
   };
 
+  const isTouchTablet = () => {
+    const hasTouch = (navigator.maxTouchPoints || 0) > 0;
+    const coarse = nativeMatchMedia('(pointer: coarse)').matches || nativeMatchMedia('(any-pointer: coarse)').matches;
+    const tabletLike = Math.max(window.innerWidth || 0, window.innerHeight || 0) >= 900;
+    const uaTablet = /ipad|android/i.test(navigator.userAgent || '');
+
+    return (hasTouch || coarse) && (tabletLike || uaTablet);
+  };
+
+  const applyTabletDragLock = () => {
+    const locked = isTouchTablet();
+    document.documentElement.classList.toggle('tablet-drag-lock', locked);
+
+    if (!locked) return;
+
+    document.querySelectorAll('.token--movable[draggable="true"]').forEach((el) => {
+      el.setAttribute('draggable', 'false');
+    });
+  };
+
+  const preventTokenDrag = (event) => {
+    if (!document.documentElement.classList.contains('tablet-drag-lock')) return;
+
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest('.token--movable')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  applyTabletDragLock();
+  window.addEventListener('resize', applyTabletDragLock);
+  window.addEventListener('orientationchange', applyTabletDragLock);
+  document.addEventListener('dragstart', preventTokenDrag, { capture: true });
+
+  const observer = new MutationObserver(() => applyTabletDragLock());
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
   const createForcedMql = (query) => {
     const listeners = new Set();
 
