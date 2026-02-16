@@ -12,3 +12,23 @@
 .content{padding-bottom:calc(var(--footer-h) + var(--kb, 0px) + 48px)}
 .panel--task{padding-bottom:calc(var(--footer-h) + 48px + env(safe-area-inset-bottom))}
 .exprCard{scroll-margin-bottom:calc(var(--footer-h) + 56px + env(safe-area-inset-bottom))}
+
+/* Fix mobile dropdown clipping and allow vertical scroll in task content */
+.content{overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:520px)and (orientation:portrait){
+  .panel--task .exprCard{overflow:visible}
+}
+
+/* Tablet: mirror mobile-app visual emphasis for Key button */
+@keyframes keyPulse{
+  0%{box-shadow:0 0 0 0 rgba(138,142,233,.45),0 6px 16px rgba(138,142,233,.28)}
+  70%{box-shadow:0 0 0 12px rgba(138,142,233,0),0 8px 20px rgba(138,142,233,.36)}
+  100%{box-shadow:0 0 0 0 rgba(138,142,233,0),0 6px 16px rgba(138,142,233,.28)}
+}
+@media (min-width:701px) and (max-width:1024px){
+  .footerBtn--key{
+    border:2px solid rgba(138,142,233,.9)!important;
+    box-shadow:0 0 0 3px rgba(138,142,233,.2),0 6px 16px rgba(138,142,233,.28);
+    animation:keyPulse 1.5s ease-in-out infinite;
+  }
+}
