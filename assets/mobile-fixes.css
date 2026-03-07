@@ -1,0 +1,37 @@
+@media (max-width: 900px) {
+  .app {
+    min-height: 0;
+  }
+
+  .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .panel--task .exprCard.hammerCard {
+    overflow: visible !important;
+  }
+
+  .exprCard.hammerCard .pickMenu {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    min-width: 0 !important;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .exprCard.hammerCard .pickMenu__item {
+    width: 100%;
+    max-width: none;
+    font-size: 18px;
+    padding: 10px 12px;
+  }
+
+  .exprCard.hammerCard .exprRow--expanded {
+    flex-wrap: wrap !important;
+    white-space: normal !important;
+  }
+}
